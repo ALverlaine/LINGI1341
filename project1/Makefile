@@ -19,10 +19,10 @@ DIR = src
 DEPS = src/packet_interface.h
 
 # Object
-OBJ = src/packet_implem.o src/server.o 
+OBJ = src/packet_implem.o src/sender.o 
 
 # Default target
-all: clean server
+all: clean sender
 
 # If we run `make debug` instead, keep the debug symbols for gdb
 # and define the DEBUG macro.
@@ -33,10 +33,10 @@ debug: clean database
 # compile them and link the resulting *.o's into an executable named database
 %.o: $(DIR)/%.c  $(DEPS)
 	$(CC) -c $@ $< $(CFLAGS)
-server: $(OBJ)
+sender: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 .PHONY: clean
 
 clean:
-	@rm -f $(DIR)/*.o server
+	@rm -f $(DIR)/*.o sender
