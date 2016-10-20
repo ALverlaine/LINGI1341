@@ -25,30 +25,24 @@ char *file = NULL;
 char *hostname = NULL;
 int port = -1;
 
-
-int main(int argc, char **argv){
+int main(int argc, char ** argv){
     
+    int stdout_output = 0;
     FILE* f = NULL;
-    int client = 1;
+    int client = 0;
     
     //Initialization
     parse_parameters(argc, argv);
     
     if (file == NULL) {
-        FILE* stdin_f = fopen("stdin_input.txt", "a");
-        printf("Write a message to send:\n");
-        char text [512];
-        ssize_t c;
-        while((c = read(STDIN_FILENO, text, (ssize_t)511)) > 0){
-            fprintf(stdin_f, "%s", text);
-            memset(text, 0, 512);
-        }
-        fclose(stdin_f);
-        file = "stdin_input.txt";
+        //ecriture sur la sortie
+        f = stdout;
+        printf("file is null\n");
+        stdout_output = 1;
     }
-    
-    //open file in a reading mode
-    f = fopen(file, "r");
+    if (!stdout_output) {
+        f = fopen(file, "a");
+    }
     
     /* Resolve the hostname */
     struct sockaddr_in6 addr;
@@ -121,5 +115,3 @@ void parse_parameters(int argc, char **argv){
     }
     
 }
-
-

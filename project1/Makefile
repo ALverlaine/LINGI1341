@@ -8,43 +8,37 @@ CFLAGS += -Wshadow # Warn when shadowing variables
 CFLAGS += -Wextra # Enable additional warnings
 CFLAGS += -O2 -D_FORTIFY_SOURCE=2 # Add canary code, i.e. detect buffer overflows
 CFLAGS += -fstack-protector-all # Add canary code to detect stack smashing
-CFLAGS += -I$(HOME)/local/include
 
 # We have no libraries to link against except libc
-LDFLAGS += -lz 
-LDFLAGS += -L$(HOME)/local/lib -lcunit
+LDFLAGS= -lz
 
 # Directory
 DIR = src
-DIR2 = tests
 
 # DESPS
-DEPS = src/packet_interface.h
+DEPS = src/packet_interface.h src/create_socket.h src/read_write_loop.h src/real_address.h src/wait_for_client.h
 
 # Object
-OBJ = src/packet_implem.o src/sender.o 
-OBJ2 = tests/test.o
+OBJ = src/packet_implem.o src/create_socket.o src/read_write_loop.o src/real_address.o src/wait_for_client.o 
 
 # Default target
-all: clean sender
+all: clean sender receiver
 
 # If we run `make debug` instead, keep the debug symbols for gdb
 # and define the DEBUG macro.
 debug: CFLAGS += -g -DDEBUG -Wno-unused-parameter
-debug: clean database
+debug: clean sender
 
 # We use an implicit rule: look for the files record.c/database.c,
 # compile them and link the resulting *.o's into an executable named database
 %.o: $(DIR)/%.c  $(DEPS)
 	$(CC) -c $@ $< $(CFLAGS)
-%.o: $(DIR2)/%.c  $(DEPS)
-	$(CC) -c $@ $< $(CFLAGS)
-test : $(DIR)/packet_implem.o $(DIR2)/test.o
+sender: $(OBJ) src/sender.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
-sender: $(OBJ)
+receiver: $(OBJ) src/receiver.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 .PHONY: clean
 
 clean:
-	@rm -f $(DIR)/*.o sender $(DIR2)/*.o test
+	@rm -f $(DIR)/*.o server receiver

@@ -26,4 +26,4 @@ chat: chat.o read_write_loop.o create_socket.o real_address.o wait_for_client.o
 .PHONY: clean
 
 clean:
-@rm -f chat chat.o read_write_loop.o create_socket.o real_address.o wait_for_client.o
+	@rm -f chat chat.o read_write_loop.o create_socket.o real_address.o wait_for_client.o
