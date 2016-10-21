@@ -35,15 +35,6 @@ void testPkt_new()
 	pkt_del(p);
 }
 
-///* Test de pkt_del()
-// *
-// */
-//void testPkt_del()
-//{
-//	pkt_t *p = pkt_new();
-//	pkt_del(p);
-//	CU_ASSERT_PTR_EQUAL(p, NULL);
-//}
 
 /* Test de pkt_decode().
  *
@@ -202,7 +193,6 @@ int main()
 	}
 	
 	if((NULL == CU_add_test(pSuite,"test de l'initiation d'un packet",testPkt_new)) ||
-	   //(NULL == CU_add_test(pSuite, "test de pkt_del", testPkt_del)) ||
 	   (NULL == CU_add_test(pSuite,"test des get et set", testPkt_getsSets)) ||
 	   (NULL == CU_add_test(pSuite, "test de encode", testPkt_encode)) ||
 	   (NULL == CU_add_test(pSuite, "test de decode", testPkt_decode))
