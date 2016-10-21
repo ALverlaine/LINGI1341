@@ -19,7 +19,7 @@ DIR = src
 DIR2 = tests
 
 # DESPS
-DEPS = src/packet_interface.h src/create_socket.h src/read_write_loop.h src/real_address.h src/wait_for_client.h
+DEPS = $(DIR)/packet_interface.h $(DIR)/create_socket.h $(DIR)/read_write_loop.h $(DIR)/real_address.h $(DIR)/wait_for_client.h
 
 # Object
 OBJ = $(DIR)/packet_implem.o $(DIR)/create_socket.o $(DIR)/read_write_loop.o $(DIR)/real_address.o $(DIR)/wait_for_client.o 
