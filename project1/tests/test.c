@@ -182,7 +182,6 @@ void test_real_address()
 	struct sockaddr_in6 *rval = malloc(sizeof(struct sockaddr_in6));
 	const char *address = "::1"; //adresse non valide??
 	const char *result = real_address(address, rval);
-	printf("1\n");
 	CU_ASSERT_PTR_EQUAL(result, NULL);
 	free(rval);
 }
@@ -217,35 +216,24 @@ void test_create_socket1()
 	free(addr1);
 }
 
-///* Test de create_socket si les arguments ne sont pas corrects
-// *
-// */
-//void test_create_socket2()
-//{
-//	struct sockaddr_in6 *addr = malloc(sizeof(struct sockaddr_in6));
-//	struct sockaddr_in6 *addr1 = malloc(sizeof(struct sockaddr_in6));
-//	real_address("::1", addr);
-//	real_address("::1", addr1);
-//	struct sockaddr_in6 *src = addr;
-//	int src_port = 23;
-//	struct sockaddr_in6 *dest_addr = addr1;
-//	int dst_port = 23;
-//	int result = create_socket(NULL, src_port, dest_addr, dst_port);
-//	CU_ASSERT_EQUAL(result, -1);
-//	
-//	result = create_socket(src, 0, dest_addr, dst_port);
-//	CU_ASSERT_EQUAL(result, -1);
-//	
-//	result = create_socket(src, src_port, NULL, dst_port);
-//	CU_ASSERT_EQUAL(result, -1);
-//	
-//	result = create_socket(src, src_port, dest_addr, 0);
-//	CU_ASSERT_EQUAL(result, -1);
-//	
-//	free(addr);
-//	free(addr1);
-//
-//}
+/* Test de create_socket si les arguments ne sont pas corrects
+ *
+ */
+void test_create_socket2()
+{
+	struct sockaddr_in6 *addr = malloc(sizeof(struct sockaddr_in6));
+	struct sockaddr_in6 *addr1 = malloc(sizeof(struct sockaddr_in6));
+	real_address("vvv", addr);
+	real_address("vvv", addr1);
+	struct sockaddr_in6 *src = addr;
+	int src_port = 12345;
+	struct sockaddr_in6 *dest_addr = addr1;
+	int dst_port = 12345;
+	int result = create_socket(src, src_port, dest_addr, dst_port);
+	CU_ASSERT_EQUAL(result, -1);
+	free(addr);
+	free(addr1);
+}
 
 
 
@@ -271,8 +259,8 @@ int main()
 	   (NULL == CU_add_test(pSuite, "test de decode", testPkt_decode)) ||
 	   (NULL == CU_add_test(pSuite,"test de real_address",test_real_address)) ||
 	   (NULL == CU_add_test(pSuite,"2e test de real_address",test_real_address1)) ||
-	   (NULL == CU_add_test(pSuite,"test de create_socket",test_create_socket1)) //||
-//	   (NULL == CU_add_test(pSuite,"2e test de create_socket avec bugs",test_create_socket2))
+	   (NULL == CU_add_test(pSuite,"test de create_socket",test_create_socket1)) ||
+	   (NULL == CU_add_test(pSuite,"2e test de create_socket avec bugs",test_create_socket2))
 	   )
 	{
 		CU_cleanup_registry();
