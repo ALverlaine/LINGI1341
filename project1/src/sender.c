@@ -24,32 +24,15 @@ char opt;
 char *file = NULL;
 char *hostname = NULL;
 int port = -1;
+#define BUF_SIZE 500
 
 
 int main(int argc, char **argv){
     
-    FILE* f = NULL;
-    int client = 1;
-    
     //Initialization
     parse_parameters(argc, argv);
     
-    if (file == NULL) {
-        FILE* stdin_f = fopen("stdin_input.txt", "a");
-        printf("Write a message to send:\n");
-        char text [512];
-        ssize_t c;
-        while((c = read(STDIN_FILENO, text, (ssize_t)511)) > 0){
-            fprintf(stdin_f, "%s", text);
-            memset(text, 0, 512);
-        }
-        fclose(stdin_f);
-        file = "stdin_input.txt";
-    }
-    
-    //open file in a reading mode
-    f = fopen(file, "r");
-    
+    printf(">>>>>>>Test 0\n");
     /* Resolve the hostname */
     struct sockaddr_in6 addr;
     const char *err = real_address(hostname, &addr);
@@ -57,28 +40,51 @@ int main(int argc, char **argv){
         fprintf(stderr, "Could not resolve hostname %s: %s\n", hostname, err);
         return EXIT_FAILURE;
     }
+    printf(">>>>>>>Test 1\n");
     /* Get a socket */
-    int sfd;
-    if (client) {
-        sfd = create_socket(NULL, -1, &addr, port); /* Connected */
-    } else {
-        sfd = create_socket(&addr, port, NULL, -1); /* Bound */
-        if (sfd > 0 && wait_for_client(sfd) < 0) { /* Connected */
-            fprintf(stderr,
-                    "Could not connect the socket after the first message.\n");
-            close(sfd);
-            return EXIT_FAILURE;
-        }
-    }
-    if (sfd < 0) {
+    
+    int sfd = create_socket(NULL, -1, &addr, port); /* Connected */
+    if(sfd < 0)
+    {
         fprintf(stderr, "Failed to create the socket!\n");
         return EXIT_FAILURE;
     }
+    printf(">>>>>>>Test 2\n");
+    
+    /* Send remaining command-line arguments as separate
+     datagrams, and read responses from server */
+    
+
+    ssize_t nread;
+    char buf[BUF_SIZE];
+    size_t len;
+    
+        char * grp3 = "group 3";
+    
+        len = strlen(grp3) + 1;
+        /* +1 for terminating null byte */
+        
+        
+        if ((size_t)write(sfd, grp3, len) != len) {
+            fprintf(stderr, "partial/failed write\n");
+            exit(EXIT_FAILURE);
+        }
+        
+        nread = read(sfd, buf, BUF_SIZE);
+        if (nread == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Received %ld bytes: %s\n", (long) nread, buf);
+
+
     /* Process I/O */
-    read_write_loop(sfd);
+    //read_write_loop(sfd);
     
+    printf(">>>>>>>Test 3\n");
     close(sfd);
-    
+    printf(">>>>>>>Test 4\n");
     return EXIT_SUCCESS;
     
 }

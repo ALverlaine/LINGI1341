@@ -24,25 +24,12 @@ char opt;
 char *file = NULL;
 char *hostname = NULL;
 int port = -1;
+#define BUF_SIZE 500
 
 int main(int argc, char ** argv){
     
-    int stdout_output = 0;
-    FILE* f = NULL;
-    int client = 0;
-    
     //Initialization
     parse_parameters(argc, argv);
-    
-    if (file == NULL) {
-        //ecriture sur la sortie
-        f = stdout;
-        printf("file is null\n");
-        stdout_output = 1;
-    }
-    if (!stdout_output) {
-        f = fopen(file, "a");
-    }
     
     /* Resolve the hostname */
     struct sockaddr_in6 addr;
@@ -52,24 +39,26 @@ int main(int argc, char ** argv){
         return EXIT_FAILURE;
     }
     /* Get a socket */
-    int sfd;
-    if (client) {
-        sfd = create_socket(NULL, -1, &addr, port); /* Connected */
-    } else {
-        sfd = create_socket(&addr, port, NULL, -1); /* Bound */
-        if (sfd > 0 && wait_for_client(sfd) < 0) { /* Connected */
-            fprintf(stderr,
-                    "Could not connect the socket after the first message.\n");
-            close(sfd);
-            return EXIT_FAILURE;
-        }
-    }
-    if (sfd < 0) {
+    int sfd = create_socket(&addr, port, NULL, -1);
+    if(sfd < 0)
+    {
         fprintf(stderr, "Failed to create the socket!\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE;;
     }
-    /* Process I/O */
-    read_write_loop(sfd);
+    
+    fprintf(stderr,"Wainting for a client..\n");
+    int wait = wait_for_client(sfd);
+    if(wait < 0)
+    {
+        fprintf(stderr,
+                "Could not connect the socket after the first message.\n");
+        close(sfd);
+        return EXIT_FAILURE;;
+    }
+    fprintf(stderr,"Got a client..\n");
+    
+     /*Process I/O
+    //read_write_loop(sfd);*/
     
     close(sfd);
     
