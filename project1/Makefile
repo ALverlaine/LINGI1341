@@ -41,4 +41,4 @@ receiver: $(OBJ) src/receiver.o
 .PHONY: clean
 
 clean:
-	@rm -f $(DIR)/*.o server receiver
+	@rm -f $(DIR)/*.o server receiver test
