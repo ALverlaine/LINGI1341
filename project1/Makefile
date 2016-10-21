@@ -39,7 +39,7 @@ debug: clean sender
 	$(CC) -c $@ $< $(CFLAGS)
 %.o : $(DIR2)/%.c $(DEPS)
 	$(CC) -c $@ $< $(CFLAGS)
-test : $(DIR)/packet_implem.o $(DIR2)/test.o
+test : $(DIR)/packet_implem.o $(DIR)/real_address.o $(DIR)/create_socket.o $(DIR2)/test.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 sender: $(OBJ) src/sender.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)

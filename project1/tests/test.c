@@ -5,7 +5,8 @@
 #include <string.h>
 
 #include "packet_interface.h"
-//#include <create_socket.h> ?
+#include "real_address.h"
+#include "create_socket.h"
 
 
 ///*	Initialisation de la suite de tests
@@ -63,6 +64,7 @@ void testPkt_decode()
 	CU_ASSERT_EQUAL(pkt_get_window(p1), 1);
 	CU_ASSERT_EQUAL(pkt_get_seqnum(p1), 2);
 	CU_ASSERT_EQUAL(pkt_get_length(p1), 4);
+	//printf(" crc is %i \n", (unsigned int) pkt_get_crc(p1));
 	CU_ASSERT_EQUAL(pkt_get_crc(p1), 4);
 	CU_ASSERT_STRING_EQUAL(pkt_get_payload(p1), c);
 	CU_ASSERT_EQUAL(result, PKT_OK);
@@ -72,10 +74,8 @@ void testPkt_decode()
 	result = pkt_decode(buf, 2, p1);
 	CU_ASSERT_PTR_NOT_EQUAL(p, NULL);
 	CU_ASSERT_EQUAL(result, E_NOHEADER);
-	printf("\n 2\n");
 	length = 50;
 	//result = pkt_decode(NULL, length, p1);
-	printf("\n 3\n");
 	//CU_ASSERT_EQUAL(result, E_UNCONSISTENT);
 	
 //	pkt_set_type(p2, (const ptypes_t) 3);
@@ -88,7 +88,6 @@ void testPkt_decode()
 //	result = pkt_encode(p2, buf, &length);
 //	result = pkt_decode(buf, length, p1);
 //	CU_ASSERT_EQUAL(result, E_TYPE);
-	printf("\n 4\n");
 	pkt_set_type(p3, (const ptypes_t) PTYPE_DATA);
 	pkt_set_window(p3, 1);
 	pkt_set_seqnum(p3, 2);
@@ -98,9 +97,7 @@ void testPkt_decode()
 	length = 50;
 	result = pkt_encode(p3, buf, &length);
 	result = pkt_decode(buf, length, p1);
-	printf("%d\n",result);
 	CU_ASSERT_EQUAL(result, E_LENGTH);
-	printf("\n 5\n");
 //	pkt_set_type(p4, (const ptypes_t) PTYPE_DATA);
 //	pkt_set_window(p4, 1);
 //	pkt_set_seqnum(p4, 2);
@@ -113,15 +110,10 @@ void testPkt_decode()
 //	CU_ASSERT_EQUAL(result, E_CRC);
 	
 	pkt_del(p);
-	printf("\n 6\n");
 	//pkt_del(p1);
-	printf("\n 7\n");
 	//pkt_del(p2);
-	printf("\n 8\n");
 	pkt_del(p3);
-	printf("\n 9\n");
 	//pkt_del(p4);
-	printf("\n 10\n");
 }
 
 /* Test de pkt_encode().
@@ -182,6 +174,78 @@ void testPkt_getsSets()
 	pkt_del(p);
 }
 
+/* Test de real_address si les arguments sont corrects
+ *
+ */
+void test_real_address()
+{
+	struct sockaddr_in6 *rval = malloc(sizeof(struct sockaddr_in6));
+	const char *address = "::1"; //adresse non valide??
+	const char *result = real_address(address, rval);
+	printf("1\n");
+	CU_ASSERT_PTR_EQUAL(result, NULL);
+	free(rval);
+}
+
+/* Test de real_address si les arguments sont incorrects
+ *
+ */
+void test_real_address1()
+{
+	struct sockaddr_in6 *rval = NULL;
+	const char *address = "1";
+	const char *result = real_address(address, rval);
+	CU_ASSERT_PTR_NOT_EQUAL(result, NULL);
+}
+
+/* Test de create_socket si les arguments sont corrects
+ *
+ */
+void test_create_socket1()
+{
+	struct sockaddr_in6 *addr = malloc(sizeof(struct sockaddr_in6));
+	struct sockaddr_in6 *addr1 = malloc(sizeof(struct sockaddr_in6));
+	real_address("::1", addr);
+	real_address("::1", addr1);
+	struct sockaddr_in6 *src = addr;
+	int src_port = 23;
+	struct sockaddr_in6 *dest_addr = addr1;
+	int dst_port = 23;
+	int result = create_socket(src, src_port, dest_addr, dst_port);
+	CU_ASSERT_NOT_EQUAL(result, -1);
+	free(addr);
+	free(addr1);
+}
+
+/* Test de create_socket si les arguments ne sont pas corrects
+ *
+ */
+void test_create_socket2()
+{
+	struct sockaddr_in6 *addr = malloc(sizeof(struct sockaddr_in6));
+	struct sockaddr_in6 *addr1 = malloc(sizeof(struct sockaddr_in6));
+	real_address("::1", addr);
+	real_address("::1", addr1);
+	struct sockaddr_in6 *src = addr;
+	int src_port = 23;
+	struct sockaddr_in6 *dest_addr = addr1;
+	int dst_port = 23;
+	int result = create_socket(NULL, src_port, dest_addr, dst_port);
+	CU_ASSERT_EQUAL(result, -1);
+	
+	result = create_socket(src, 0, dest_addr, dst_port);
+	CU_ASSERT_EQUAL(result, -1);
+	
+	result = create_socket(src, src_port, NULL, dst_port);
+	CU_ASSERT_EQUAL(result, -1);
+	
+	result = create_socket(src, src_port, dest_addr, 0);
+	CU_ASSERT_EQUAL(result, -1);
+	
+	free(addr);
+	free(addr1);
+
+}
 
 
 
@@ -194,7 +258,7 @@ int main()
 		return CU_get_error();
 	}
 	
-	pSuite = CU_add_suite("Suite de tests pour packet_implem.c", NULL, NULL);
+	pSuite = CU_add_suite("Suite de tests", NULL, NULL);
 	if(NULL == pSuite)
 	{
 		CU_cleanup_registry();
@@ -204,13 +268,19 @@ int main()
 	if((NULL == CU_add_test(pSuite,"test de l'initiation d'un packet",testPkt_new)) ||
 	   (NULL == CU_add_test(pSuite,"test des get et set", testPkt_getsSets)) ||
 	   (NULL == CU_add_test(pSuite, "test de encode", testPkt_encode)) ||
-	   (NULL == CU_add_test(pSuite, "test de decode", testPkt_decode))
+	   (NULL == CU_add_test(pSuite, "test de decode", testPkt_decode)) ||
+	   (NULL == CU_add_test(pSuite,"test de real_address",test_real_address)) ||
+	   (NULL == CU_add_test(pSuite,"2e test de real_address",test_real_address1)) ||
+	   (NULL == CU_add_test(pSuite,"test de create_socket",test_create_socket1)) ||
+	   (NULL == CU_add_test(pSuite,"2e test de create_socket avec bugs",test_create_socket2))
 	   )
 	{
 		CU_cleanup_registry();
 		return CU_get_error();
 		
 	}
+	
+	
 	CU_basic_run_tests();
 	CU_cleanup_registry();
 	return CU_get_error();
