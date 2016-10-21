@@ -8,18 +8,22 @@ CFLAGS += -Wshadow # Warn when shadowing variables
 CFLAGS += -Wextra # Enable additional warnings
 CFLAGS += -O2 -D_FORTIFY_SOURCE=2 # Add canary code, i.e. detect buffer overflows
 CFLAGS += -fstack-protector-all # Add canary code to detect stack smashing
+CFLAGS += -I$(HOME)/local/include
 
 # We have no libraries to link against except libc
-LDFLAGS= -lz
+LDFLAGS += -lz
+LDFLAGS += -L$(HOME)/local/lib -lcunit
 
 # Directory
 DIR = src
+DIR2 = tests
 
 # DESPS
-DEPS = src/packet_interface.h src/create_socket.h src/read_write_loop.h src/real_address.h src/wait_for_client.h
+DEPS = $(DIR)/packet_interface.h $(DIR)/create_socket.h $(DIR)/read_write_loop.h $(DIR)/real_address.h $(DIR)/wait_for_client.h
 
 # Object
-OBJ = src/packet_implem.o src/create_socket.o src/read_write_loop.o src/real_address.o src/wait_for_client.o 
+OBJ = $(DIR)/packet_implem.o $(DIR)/create_socket.o $(DIR)/read_write_loop.o $(DIR)/real_address.o $(DIR)/wait_for_client.o 
+OBJ2 = $(DIR2)/test.o
 
 # Default target
 all: clean sender receiver
@@ -33,6 +37,10 @@ debug: clean sender
 # compile them and link the resulting *.o's into an executable named database
 %.o: $(DIR)/%.c  $(DEPS)
 	$(CC) -c $@ $< $(CFLAGS)
+%.o : $(DIR2)/%.c $(DEPS)
+	$(CC) -c $@ $< $(CFLAGS)
+test : $(DIR)/packet_implem.o $(DIR)/real_address.o $(DIR)/create_socket.o $(DIR2)/test.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 sender: $(OBJ) src/sender.o 
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 receiver: $(OBJ) src/receiver.o 
@@ -41,4 +49,4 @@ receiver: $(OBJ) src/receiver.o
 .PHONY: clean
 
 clean:
-	@rm -f $(DIR)/*.o server receiver
+	@rm -f $(DIR)/*.o $(DIR2)/*.o sender receiver test
