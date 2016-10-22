@@ -19,6 +19,7 @@
 #include "wait_for_client.h"
 
 void parse_parameters(int argc, char **argv);
+int file_write(int sfd, FILE* f);
 
 char opt;
 char *file = NULL;
@@ -27,6 +28,8 @@ int port = -1;
 #define BUF_SIZE 500
 
 int main(int argc, char ** argv){
+    
+    FILE* f = NULL;
     
     //Initialization
     parse_parameters(argc, argv);
@@ -58,9 +61,20 @@ int main(int argc, char ** argv){
     
     /* No file specified */
     if (file == NULL) {
-        printf("Connected ... \n");
         /* Process I/O */
         read_write_loop(sfd);
+    }
+    else{
+        /* Open for appending (writing at end of file) */
+        f = fopen(file, "a");
+        
+        if(file_write(sfd, f) < 0){
+            fclose(f);
+            close(sfd);
+            return EXIT_FAILURE;
+        }
+        
+        fclose(f);
     }
     
     close(sfd);
@@ -68,6 +82,26 @@ int main(int argc, char ** argv){
     return EXIT_SUCCESS;
     
 }
+
+int file_write(int sfd, FILE* f){
+    
+    
+    char buffer[BUF_SIZE];
+    ssize_t r = read(sfd, buffer, BUF_SIZE);
+    if(r == EOF){
+        return 0;
+    }
+    
+    int w = (int) fwrite(buffer , 1 , r, f);
+    
+    if(w == -1){
+        fprintf(stderr, "error with write (receiver)");
+        return -1;
+    }
+    
+    return 0;
+}
+
 
 void parse_parameters(int argc, char **argv){
     if (argc < 2) {

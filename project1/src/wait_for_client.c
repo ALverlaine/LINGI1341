@@ -39,7 +39,6 @@ int wait_for_client(int sfd)
                     service, NI_MAXSERV, NI_NUMERICSERV);
     if (serv == 0){
         printf("From %s\n", host);
-        fprintf(stdout,"%s\n", buffer);
     }
     else{
         fprintf(stderr, "getnameinfo: %s\n", gai_strerror(serv));

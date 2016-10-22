@@ -17,8 +17,12 @@
 #include "read_write_loop.h"
 #include "create_socket.h"
 #include "wait_for_client.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 void parse_parameters(int argc, char **argv);
+int file_read(int sfd, int fd);
 
 /* Global variable */
 char opt;
@@ -49,6 +53,9 @@ int main(int argc, char **argv){
         fprintf(stderr, "Failed to create the socket!\n");
         return EXIT_FAILURE;
     }
+    /* First message */
+    char *hello = "hello";
+    write(sfd,hello,sizeof(hello));
     
     /* No file specified */
     if (file == NULL) {
@@ -56,11 +63,36 @@ int main(int argc, char **argv){
         /* Process I/O */
         read_write_loop(sfd);
     }
+    else{
+        /* Open in reading mode*/
+        int f = open(file, O_RDONLY);
+        
+        if(file_read(sfd, f) < 0){
+            close(f);
+            close(sfd);
+            return EXIT_FAILURE;
+        }
+        
+        close(f);
+    }
     
     close(sfd);
 
     return EXIT_SUCCESS;
     
+}
+
+int file_read(int sfd, int fd){
+    char buffer[BUF_SIZE];
+    ssize_t r = read(fd, buffer, sizeof(buffer));
+    
+    int w = (int) write(sfd,buffer,r);
+    if(w == -1){
+        fprintf(stderr, "error with write (sender)");
+        return -1;
+    }
+
+    return 0;
 }
 
 void parse_parameters(int argc, char **argv){
