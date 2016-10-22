@@ -12,7 +12,7 @@ CFLAGS += -I$(HOME)/local/include
 
 # We have no libraries to link against except libc
 LDFLAGS += -lz
-LDFLAGS += -L$(HOME)/local/lib -lcunit
+# LDFLAGS += -L$(HOME)/local/lib -lcunit
 
 # Directory
 DIR = src

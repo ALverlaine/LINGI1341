@@ -20,6 +20,7 @@
 
 void parse_parameters(int argc, char **argv);
 
+/* Global variable */
 char opt;
 char *file = NULL;
 char *hostname = NULL;
@@ -32,7 +33,6 @@ int main(int argc, char **argv){
     //Initialization
     parse_parameters(argc, argv);
     
-    printf(">>>>>>>Test 0\n");
     /* Resolve the hostname */
     struct sockaddr_in6 addr;
     const char *err = real_address(hostname, &addr);
@@ -40,7 +40,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "Could not resolve hostname %s: %s\n", hostname, err);
         return EXIT_FAILURE;
     }
-    printf(">>>>>>>Test 1\n");
+
     /* Get a socket */
     
     int sfd = create_socket(NULL, -1, &addr, port); /* Connected */
@@ -49,42 +49,16 @@ int main(int argc, char **argv){
         fprintf(stderr, "Failed to create the socket!\n");
         return EXIT_FAILURE;
     }
-    printf(">>>>>>>Test 2\n");
     
-    /* Send remaining command-line arguments as separate
-     datagrams, and read responses from server */
+    /* No file specified */
+    if (file == NULL) {
+        printf("Write a message to send:\n");
+        /* Process I/O */
+        read_write_loop(sfd);
+    }
     
-
-    ssize_t nread;
-    char buf[BUF_SIZE];
-    size_t len;
-    
-        char * grp3 = "group 3";
-    
-        len = strlen(grp3) + 1;
-        /* +1 for terminating null byte */
-        
-        
-        if ((size_t)write(sfd, grp3, len) != len) {
-            fprintf(stderr, "partial/failed write\n");
-            exit(EXIT_FAILURE);
-        }
-        
-        nread = read(sfd, buf, BUF_SIZE);
-        if (nread == -1) {
-            perror("read");
-            exit(EXIT_FAILURE);
-        }
-        
-        printf("Received %ld bytes: %s\n", (long) nread, buf);
-
-
-    /* Process I/O */
-    //read_write_loop(sfd);
-    
-    printf(">>>>>>>Test 3\n");
     close(sfd);
-    printf(">>>>>>>Test 4\n");
+
     return EXIT_SUCCESS;
     
 }

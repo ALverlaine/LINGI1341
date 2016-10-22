@@ -55,10 +55,13 @@ int main(int argc, char ** argv){
         close(sfd);
         return EXIT_FAILURE;;
     }
-    fprintf(stderr,"Got a client..\n");
     
-     /*Process I/O
-    //read_write_loop(sfd);*/
+    /* No file specified */
+    if (file == NULL) {
+        printf("Connected ... \n");
+        /* Process I/O */
+        read_write_loop(sfd);
+    }
     
     close(sfd);
     
