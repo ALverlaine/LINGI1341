@@ -45,12 +45,13 @@ pkt_t* pkt_new()
     return NULL;
 }
 
-pkt_t* pkt_new1(ptypes_t t, uint8_t w, uint16_t length, char* p)
+pkt_t* pkt_new1(ptypes_t t, uint8_t w, uint16_t length, char* p, uint8_t seq)
 {
 	pkt_t *packet = (pkt_t *) malloc(sizeof(pkt_t));
 	if(packet!=NULL)
 	{
 		packet->payload = p;
+		packet->seqnum = seq;
 		packet->type = t;
 		packet->window = w;
 		packet->length = length;//??
