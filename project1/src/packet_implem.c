@@ -44,6 +44,23 @@ pkt_t* pkt_new()
     return NULL;
 }
 
+pkt_t* pkt_new1(ptypes_t t, uint8_t w, uint16_t length, char* p)
+{
+	pkt_t *packet = (pkt_t *) malloc(sizeof(pkt_t));
+	if(packet!=NULL)
+	{
+		packet->payload = p;
+		packet->type = t;
+		packet->window = w;
+		packet->length = length;//??
+		packet->timestamp = 
+		return packet;
+	}
+	
+	return NULL;
+	
+}
+
 /* Libère le pointeur vers la struct pkt, ainsi que toutes les
  * ressources associées
  */

@@ -42,6 +42,8 @@ typedef enum {
 /* Alloue et initialise une struct pkt
  * @return: NULL en cas d'erreur */
 pkt_t* pkt_new();
+
+pkt_t* pkt_new1(ptypes_t t, uint8_t w, uint16_t length, char* p);
 /* Libère le pointeur vers la struct pkt, ainsi que toutes les
  * ressources associées
  */
