@@ -11,6 +11,7 @@
 #include <zlib.h> //bytef
 #include <string.h> // memcpy
 #include <netinet/in.h> //htons
+#include <time.h> //timeval
 #include "packet_interface.h"
 
 #define HEADER_SIZE 4
@@ -53,7 +54,8 @@ pkt_t* pkt_new1(ptypes_t t, uint8_t w, uint16_t length, char* p)
 		packet->type = t;
 		packet->window = w;
 		packet->length = length;//??
-		packet->timestamp = 
+		time_t *t1 = NULL;
+		packet->timestamp = (uint32_t) time(t1);
 		return packet;
 	}
 	
