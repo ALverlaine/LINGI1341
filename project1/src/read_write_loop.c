@@ -7,6 +7,7 @@
 //
 
 #include "read_write_loop.h"
+#include "packet_interface.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -18,6 +19,7 @@ void read_write_loop(int sfd) {
     
     fd_set sfds;
     char buff[MAX_SEGMENT_SIZE];
+	size_t *len = MAX_SEGMENT_SIZE;
     FD_ZERO(&sfds);
     
     while(true)
@@ -34,12 +36,19 @@ void read_write_loop(int sfd) {
             if(r == EOF){
                 break;
             }
-            
-            int w = (int) write(sfd,buff,r);
-            if(w == -1){
-                fprintf(stderr, "error with write (read_write_loop)");
-            }
-            
+			
+			pkt_t *pkt;
+			size_t l = *len; //faut verifier si ca fonctionne, faudrait garder len comme il est pour permettre de vraiment montrer ce qu'il reste dans le buffer
+			pkt_status_code st = pkt_encode(pkt, buff, l);
+			len = &(*len -l); // retire la taille qu'on vient d'écrire
+            if(st == PKT_OK)
+			{
+				int w = (int) write(sfd,pkt,r);
+				if(w == -1){
+					fprintf(stderr, "error with write (read_write_loop)");
+				}
+			}
+			
         }else if(FD_ISSET(sfd,&sfds))
         {
             ssize_t r=read(sfd,buff,MAX_SEGMENT_SIZE);
@@ -47,8 +56,9 @@ void read_write_loop(int sfd) {
             if(r == EOF){
                 break;
             }
-            
-            int w = (int) write(STDOUT_FILENO,buff,r);
+			pkt_t *pkt1;
+			pkt_status_code st1 = pkt_decode(&buff, sizeof(buff), pkt1);
+            int w = (int) write(STDOUT_FILENO,pkt1,r);
             
             if(w == -1){
                 fprintf(stderr, "error with write (read_write_loop)");
