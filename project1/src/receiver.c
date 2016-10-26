@@ -26,7 +26,8 @@ char *file = NULL;
 char *hostname = NULL;
 int port = -1;
 #define BUF_SIZE 500
-
+//Il faut une variable globale qui contient le dernier numéro de séquence de reçu. Si le nouveau est l'ancien+1 alors on le change sinon, on renvoie un ack
+//avec comme numéro de séquence (ancien+1) pour signaler la perte d'un packet.
 int main(int argc, char ** argv){
     
     FILE* f = NULL;
