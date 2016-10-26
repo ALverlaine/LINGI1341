@@ -105,6 +105,7 @@ float speed = 0;
 void parse_parameters(int argc, char **argv);
 int file_read(int sfd, int fd);
 
+
 int main(int argc, char **argv){
     
     FILE *fp;
