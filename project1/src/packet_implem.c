@@ -17,15 +17,7 @@
 #define TIMESTAMP_SIZE 4
 #define CRC_SIZE 4
 
-struct __attribute__((__packed__)) pkt {
-    ptypes_t type : 3; // 3bits
-    uint8_t window : 5; // 5bits
-    uint8_t seqnum; // 8bits
-    uint16_t length; // 16bits
-    uint32_t timestamp; // 32 bits
-    char *payload; // max 4096bits
-    uint32_t crc; // 32bits
-};
+
 
 
 /* Alloue et initialise une struct pkt
@@ -79,6 +71,7 @@ void pkt_del(pkt_t *pkt)
  */
 pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 {
+    fprintf(stderr, "decoding ... \n");
     /* type */
     ptypes_t type=data[0] >>5;
     if(type==PTYPE_DATA || type==PTYPE_ACK)
@@ -177,12 +170,11 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
  */
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
-    fprintf(stderr, "encode\n");
+    fprintf(stderr, "encoding ... \n");
     uint16_t payload_len = htons(pkt_get_length(pkt)); // get length
     uint8_t seqnum = pkt_get_seqnum(pkt);
     uint32_t timestamp = pkt_get_timestamp(pkt); // get timestamp
     
-    fprintf(stderr, "payload_len : %zu and len : %zu and size : %zu", (size_t)payload_len, *len, (size_t)HEADER_SIZE+TIMESTAMP_SIZE+pkt_get_length(pkt)+CRC_SIZE);
     /* header + timestamp + payload + CRC ?> len */
     if(HEADER_SIZE+TIMESTAMP_SIZE+pkt_get_length(pkt)+CRC_SIZE > (uint16_t)*len){
         /* error buf to small */
