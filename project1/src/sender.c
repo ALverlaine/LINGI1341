@@ -31,7 +31,8 @@ char *hostname = NULL;
 int port = -1;
 const int timeout =  500;//en microsecondes.
 #define BUF_SIZE 500
-
+//il faut un buffer qui contient les packets qui ont été envoyés et quand on recoit un ack on supprime du buffer tous ceux qui ont un numéro
+//de séquence inférieur à celui de l'ack
 
 int main(int argc, char **argv){
     
