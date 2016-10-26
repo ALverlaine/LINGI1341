@@ -29,6 +29,7 @@ char opt;
 char *file = NULL;
 char *hostname = NULL;
 int port = -1;
+const int timeout =  500;//en microsecondes.
 #define BUF_SIZE 500
 
 
