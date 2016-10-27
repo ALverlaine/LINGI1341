@@ -35,7 +35,7 @@
 #define TIME_s 1
 #define TIME_m 150000
 #define WINDOW_NBR 5
-#define MAXPACKETSIZE 520
+#define MAXPACKETSIZE 1024
 #define PAYLOADSIZE 512
 #define MAXSEQNUM 255
 #define TRUE 1
@@ -114,8 +114,8 @@ int main(int argc, char **argv){
     parse_parameters(argc, argv);
     
     /* Resolve the hostname */
-    struct sockaddr_storage addr;
-    const char *err = real_address(hostname, (struct sockaddr_in6 *)&addr);
+    struct sockaddr_in6 addr;
+    const char *err = real_address(hostname, &addr);
     if (err) {
         fprintf(stderr, "Could not resolve hostname %s: %s\n", hostname, err);
         return EXIT_FAILURE;
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
 
     /* Get a socket */
     
-    sfd = create_socket(NULL, -1, (struct sockaddr_in6*)&addr, atoi(port)); /* Connected */
+    sfd = create_socket(NULL, -1, &addr, atoi(port)); /* Connected */
     if(sfd < 0)
     {
         fprintf(stderr, "Failed to create the socket!\n");
@@ -172,9 +172,9 @@ int main(int argc, char **argv){
     }
 
     
-    /* First message */
+    /* First message
     char *hello = "hello";
-    write(sfd,hello,sizeof(hello));
+    write(sfd,hello,sizeof(hello));*/
     
     /* No file specified */
     if (file == NULL) {
@@ -219,7 +219,6 @@ int main(int argc, char **argv){
         
         /* SLIDING WINDOW/BUFFER FULL? */
         if (get_windowsize() > get_buffer_length()) {
-////////////////////////////////////////////////////////////////////
             /* NEXT PACKET IS IN WINDOW? */
             if (is_in_window(last_sent)) {
                 /* DID WE FINISH READING THE FILE? */
@@ -234,16 +233,11 @@ int main(int argc, char **argv){
                         rd = fread(chunk, 1, PAYLOADSIZE, fp);
                         pckt = create_pckt(chunk, PTYPE_DATA, rd);
                     }
-                    printf("Type :%u\n", pckt->type);
-                    printf("window :%u\n", pckt->window);
-                    printf("Seqnum :%u\n", pckt->seqnum);
-                    printf("Length :%u\n", pckt->type);
-                    printf("payload :%s\n", pckt->payload);
+                    
                     send_pckt(sfd, pckt, FALSE);
                     increment_total_sent();
                 }
             }
-////////////////////////////////////////////////////////////////////
         }
         
         else if (!rs_is_empty()) {
@@ -804,7 +798,6 @@ void proto_send_pckt(int sock_desc, pkt_t *pckt) {
     
     size_t *len = malloc(sizeof(size_t));
     *len = sizeof(raw_pckt);
-    printf("length :%zu\n", *len);
     
     pkt_status_code code = pkt_encode(pckt, raw_pckt, len);
     
@@ -813,6 +806,7 @@ void proto_send_pckt(int sock_desc, pkt_t *pckt) {
         //socklen_t address_len;
         //address_len = sizeof(struct sockaddr_storage);
         
+        fprintf(stdout,"Sending ... \n");
         int w = (int) write(sock_desc,raw_pckt,*len);
         if(w == -1){
             fprintf(stderr, "error with write (read_write_loop)");
@@ -847,29 +841,26 @@ uint32_t proto_read_from_pl(pkt_t *pckt, int offset, int length) {
 }
 
 pkt_t *proto_create_pckt(char *data, int type, int window, int seqnum, int length) {
-    
+    printf("create a packet .. \n");
     pkt_t *pckt = pkt_new();
-    printf("init a packet .. \n");
     if (pckt == NULL) {
         fprintf(stderr,"init a pkt\n");
         exit(EXIT_FAILURE);
     }
-    printf("init a packet .. end \n");
+
     pkt_set_type(pckt, type);
     pkt_set_window(pckt, window);
     pkt_set_seqnum(pckt, seqnum);
     pkt_set_length(pckt, length);
-    printf("init a packet .. end 2 \n");
+
     if (data != NULL) {
-        printf("data :%s\n", data);
-        printf("length :%d\n", length);
+
         pckt->payload = malloc(length);
         if (pckt->payload == NULL) {
             fprintf(stderr,"cannot allocate ..\n");
             exit(EXIT_FAILURE);
         }
         memcpy(pckt->payload, data, length);
-        printf("payload :%s\n", pckt->payload);
     }
     //proto_update_crc(pckt);
     

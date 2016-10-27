@@ -15,24 +15,24 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BUF_SIZE 520
+#define MAX_SEGMENT_SIZE 1024 //max size that can be sent
 int wait_for_client(int sfd)
 {
     
-    char buffer[520];
+    char buffer[MAX_SEGMENT_SIZE];
     struct sockaddr_storage address;
     socklen_t address_len;
     ssize_t nread;
-    int serv;
+    //int serv;
     
     
     address_len = sizeof(struct sockaddr_storage);
-    nread = recvfrom(sfd, buffer, BUF_SIZE, 0,
+    nread = recvfrom(sfd, buffer, MAX_SEGMENT_SIZE, 0,
                          (struct sockaddr *) &address, &address_len);
     if (nread == -1)
         return -1;
         
-    char host[NI_MAXHOST], service[NI_MAXSERV];
+    /*char host[NI_MAXHOST], service[NI_MAXSERV];
         
     serv = getnameinfo((struct sockaddr *) &address,
                     address_len, host, NI_MAXHOST,
@@ -49,7 +49,7 @@ int wait_for_client(int sfd)
     if (sendto(sfd, resp, resp_len, 0,
                 (struct sockaddr *) &address,
                    address_len) != resp_len)
-        fprintf(stderr, "Error sending response\n");
+        fprintf(stderr, "Error sending response\n");*/
     
     return 0;
 }
