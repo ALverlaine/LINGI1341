@@ -37,7 +37,7 @@ void empty_buffer();
 
 void selective_ack(pkt_t *pckt);
 
-void *receiver_routine(void *args);
+void *receiver_routine();
 
 int is_in_window(int seq_num);
 
