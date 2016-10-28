@@ -186,12 +186,14 @@ int main(int argc, char **argv){
         /* init input */
         fp = fopen(file, "r");
         
-        if (fp < 0) {
-            fprintf(stderr,"could not read file\n");
-            fclose(fp);
-            close(sfd);
-            return EXIT_FAILURE;
-        }
+        if(fp==NULL)
+		{
+	            fprintf(stderr,"could not read file\n");
+	            fclose(fp);
+	            close(sfd);
+	            return EXIT_FAILURE;
+		}
+
     }
     
     int rd;	// read bytes counter
@@ -408,13 +410,13 @@ struct queue_element *get_elem_from_rs(int seq_num) {
 
 void rs_remove(int seq_num) {
     struct queue_element *qe;
-    pkt_t *pckt;
+    //pkt_t *pckt;
     
     qe = get_elem_from_rs(seq_num);
     
     pthread_mutex_lock(&rs_lock);
     if (qe != NULL) {
-        pckt = (pkt_t *) qe->element;
+        //pckt = (pkt_t *) qe->element;
         if (qe->previous != NULL) {
             qe->previous->next = qe->next;
         }
@@ -784,7 +786,7 @@ pkt_t *proto_pckt_cpy(pkt_t *pckt) {
         exit(EXIT_FAILURE);
     }
     
-    bzero(copy, sizeof(pckt));
+    bzero(copy, sizeof(&pckt));
     
     size_t len = sizeof(pckt);
     memcpy(copy, pckt, len);
@@ -911,6 +913,5 @@ struct addrinfo *get_addr_info(char *host) {
     
     return addr;
 }
-
 
 
